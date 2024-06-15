@@ -2,7 +2,7 @@ function preprocessing_eeg(folder_path_root, spm_path)
 
 % initialization
 if ~exist('spm_path', 'var')
-    spm_path = '/Users/angelaseo/Documents/spm-main';
+    spm_path = '/Users/pschm/spm12_dev_main';
 end
 
 % set root path
@@ -12,7 +12,7 @@ end
 
 addpath(spm_path)
 addpath(fullfile(folder_path_root,'job_functions'))
-spm('defaults', 'eeg') 
+spm('defaults', 'eeg')
 spm_jobman('initcfg')
 
 % specifying data, participant and run paths
@@ -30,7 +30,7 @@ folder_base_sub = {'SUB1'};
 % 8 - artefacts
 % 9 - averaging
 
-switch_prep = [4];
+switch_prep = [1 2 3 4 5 6 7 8 9];
 
 
 for i = 1:numel(folder_base_sub)
@@ -45,22 +45,25 @@ for i = 1:numel(folder_base_sub)
         % Convert
         if any(switch_prep == 1)
             % select dataset
-            dataset_path = cellstr(spm_select('ExtFPListRec', folder_path_pre, 'subject1.bdf', 1));
+            dataset_path = spm_select('FPList', folder_path_pre, '^subject1.bdf$');
             
             % select channel selection
-            chanfile_path = cellstr(spm_select('ExtFPListRec', folder_path_root, 'channelselection.mat', 1));
+            chanfile_path = spm_select('FPList', folder_path_pre, '^channelselection.mat$');
             
             % run
             convert(dataset_path, chanfile_path);
+
+            % move to PRE
+            movefiles(cellstr(spm_select('FPList', folder_path_root, '^spmeeg.*$')), folder_path_pre)
         end
 
         % Montage
         if any (switch_prep == 2)
             % select converted data file
-            converted_file_path = spm_select('ExtFPListRec', folder_path_pre, '^spm.*\.mat$', 1);
+            converted_file_path = spm_select('FPList', folder_path_pre, '^spm.*\.mat$');
           
             % select averaged and rereferenced eog
-            montage_file_path = spm_select('ExtFPListRec', folder_path_root, 'avref_eog.mat', 1);
+            montage_file_path = spm_select('FPList', folder_path_pre, '^avref_eog.mat$');
            
             % run
             montage(converted_file_path, montage_file_path);
@@ -69,10 +72,10 @@ for i = 1:numel(folder_base_sub)
         % Prepare
         if any (switch_prep == 3)
             %select data file
-            converted_file_path = spm_select('ExtFPListRec', folder_path_pre, '^Mspm.*\.mat$', 1);
+            converted_file_path = spm_select('FPList', folder_path_pre, '^Mspm.*\.mat$');
         
             % select EEG sensor file
-            eegsens_file_path = spm_select('ExtFPListRec', folder_path_root, 'sensors.pol', 1);
+            eegsens_file_path = spm_select('FPList', folder_path_pre, '^sensors.pol$');
 
             % run
             prepare(converted_file_path, eegsens_file_path)
@@ -82,7 +85,7 @@ for i = 1:numel(folder_base_sub)
         if any (switch_prep == 4)
 
             % select data file
-            prepared_file_path = spm_select('ExtFPListRec', folder_path_pre, '^Mspm.*\.mat$', 1);
+            prepared_file_path = spm_select('FPList', folder_path_pre, '^Mspm.*\.mat$');
             
             % run
             highpassfilter(prepared_file_path)
@@ -91,49 +94,49 @@ for i = 1:numel(folder_base_sub)
         % Downsample
         if any (switch_prep == 5)
             % select data file
-            highpassed_filtered_file_path = spm_select('ExtFPListRec', folder_path_pre, '^fMspm.*\.mat$', 1);
+            highpassed_filtered_file_path = spm_select('FPList', folder_path_pre, '^fMspm.*\.mat$');
             
             % run
             downsample(highpassed_filtered_file_path)
         end
 
         % Low-pass filter
-        if any (switch_prep == 5)
+        if any (switch_prep == 6)
 
             % select data file
-            downsampled_file_path = spm_select('ExtFPListRec', folder_path_pre, '^dfMspm.*\.mat$', 1);
+            downsampled_file_path = spm_select('FPList', folder_path_pre, '^dfMspm.*\.mat$');
 
             % run
             lowpassfilter(downsampled_file_path)
         end
 
         % Epoch
-        if any (switch_prep == 6)
+        if any (switch_prep == 7)
             % select data file
-            lowpass_filtered_file_path = spm_select('ExtFPListRec', folder_path_pre, '^fdfMspm.*\.mat$', 1);
+            lowpass_filtered_file_path = spm_select('FPList', folder_path_pre, '^fdfMspm.*\.mat$');
 
             % select trial file
-            trial_def_file_path = spm_select('ExtFPListRec', folder_path_root, 'trialdef.mat', 1);
+            trial_def_file_path = spm_select('FPList', folder_path_pre, '^trialdef.mat$');
 
             % run
             epoch(lowpass_filtered_file_path, trial_def_file_path)
         end
 
         % Artefacts
-        if any (switch_prep == 7)
+        if any (switch_prep == 8)
 
             % select data file
-            epoched_file_path = spm_select('ExtFPListRec', folder_path_pre, '^efdfMspm.*\.mat$', 1);
+            epoched_file_path = spm_select('FPList', folder_path_pre, '^efdfMspm.*\.mat$');
 
             % run
             artefacts(epoched_file_path)
         end
 
         % Averaging
-        if any (switch_prep == 8)
+        if any (switch_prep == 9)
 
             % select data file
-            artefact_removed_file_path = spm_select('ExtFPListRec', folder_path_pre, '^efdfMspm.*\.mat$', 1);
+            artefact_removed_file_path = spm_select('FPList', folder_path_pre, '^efdfMspm.*\.mat$');
 
             % run
             averaging(artefact_removed_file_path)
