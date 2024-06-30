@@ -2,7 +2,7 @@ function preprocessing_eeg(folder_path_root, spm_path)
 
 % initialization
 if ~exist('spm_path', 'var')
-    spm_path = '/Users/pschm/spm12_dev_main';
+    spm_path = '/Users/angelaseo/Documents/spm-main';
 end
 
 % set root path
@@ -30,7 +30,7 @@ folder_base_sub = {'SUB1'};
 % 8 - artefacts
 % 9 - averaging
 
-switch_prep = [1 2 3 4 5 6 7 8 9];
+switch_prep = [3 4 5 6 7 8 9];
 
 
 for i = 1:numel(folder_base_sub)
