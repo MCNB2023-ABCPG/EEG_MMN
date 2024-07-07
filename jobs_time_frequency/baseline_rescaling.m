@@ -1,6 +1,6 @@
 % List of open inputs
 nrun = X; % enter the number of runs here
-jobfile = {'/Users/greta/Documents/GitHub/EEG_MMN/jobs/wavelet_estimation_job.m'};
+jobfile = {'/Users/greta/Documents/GitHub/EEG_MMN/jobs_time_frequency/baseline_rescaling_job.m'};
 jobs = repmat(jobfile, 1, nrun);
 inputs = cell(0, nrun);
 for crun = 1:nrun
