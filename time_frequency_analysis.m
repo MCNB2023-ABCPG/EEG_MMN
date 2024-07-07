@@ -1,5 +1,5 @@
 % Time-Frequency Analysis 
-function second_level_analysis_eeg(folder_path_root, spm_path)
+function time_frequency_analysis(folder_path_root, spm_path)
 % initialization
 if ~exist('spm_path', 'var')
     spm_path = '/Users/angelaseo/Documents/spm-main';
