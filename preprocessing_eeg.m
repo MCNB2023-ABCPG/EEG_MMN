@@ -30,7 +30,7 @@ folder_base_sub = {'SUB1'};
 % 8 - artefacts
 % 9 - averaging
 
-switch_prep = [3 4 5 6 7 8 9];
+switch_prep = [1 2 3 4 5 6 7 8 9];
 
 
 for i = 1:numel(folder_base_sub)
