@@ -1,7 +1,8 @@
 function second_level_analysis_eeg(folder_path_root, spm_path)
 % initialization
 if ~exist('spm_path', 'var')
-    spm_path = '/Users/angelaseo/Documents/spm-main';
+    %spm_path = '/Users/angelaseo/Documents/spm-main';
+    spm_path = '/Users/pschm/spm12_dev_main';
 end
 
 % set root path

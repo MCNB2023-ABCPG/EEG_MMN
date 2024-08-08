@@ -2,7 +2,8 @@
 function time_frequency_analysis(folder_path_root, spm_path)
 % initialization
 if ~exist('spm_path', 'var')
-    spm_path = '/Users/greta/Desktop/spm12';
+    %spm_path = '/Users/greta/Desktop/spm12';
+    spm_path = '/Users/pschm/spm12_dev_main';
 end
 
 % set root path
@@ -38,7 +39,7 @@ for i = 1:numel(folder_base_sub)
             mkdir(folder_path_TFA);
     end
 
-    % Wavelet estimation
+    %% Wavelet estimation
     wavelet_job = [];
     preprocessed_file = spm_select('FPList', folder_path_pre, '^aefdfMspm.*\.mat$');
     wavelet_job{1}.spm.meeg.tf.tf.D = {preprocessed_file};
@@ -53,11 +54,11 @@ for i = 1:numel(folder_base_sub)
 
     spm_jobman('run', wavelet_job);
 
-    % % Move files to TFA folder
-    movefile(spm_select('FPList', folder_path_pre, '^aefdfMspm.*\.mat$'), folder_path_TFA);
+    % Move files to TFA folder
+    copyfile(spm_select('FPList', folder_path_pre, '^aefdfMspm.*\.mat$'), folder_path_TFA);
 
     
-    % Crop
+    %% Crop
     %Initialize a cell array to store job structure for the power file
     crop_job_power = [];
 
@@ -65,7 +66,7 @@ for i = 1:numel(folder_base_sub)
     power_file = spm_select('FPList', folder_path_pre, '^tf_aefdfMspm.*\.mat$');
 
     crop_job_power{1}.spm.meeg.preproc.crop.D = {power_file};
-    crop_job_power{1}.spm.meeg.preproc.crop.timewin = [0 100];
+    crop_job_power{1}.spm.meeg.preproc.crop.timewin = [-90 200];
     crop_job_power{1}.spm.meeg.preproc.crop.freqwin = [-Inf Inf];
     crop_job_power{1}.spm.meeg.preproc.crop.channels{1}.all = 'all';
     crop_job_power{1}.spm.meeg.preproc.crop.prefix = 'p';
@@ -74,7 +75,7 @@ for i = 1:numel(folder_base_sub)
     spm_jobman('run', crop_job_power);
 
     % Move files to TFA folder
-    files_to_move = spm_select('FPList', folder_path_pre, '^tf_aefdfMspm.*\.mat$');
+    files_to_move = spm_select('FPList', folder_path_pre, '^ptf_aefdfMspm.*\.mat$');
     for j = 1:size(files_to_move, 1)
         movefile(strtrim(files_to_move(j, :)), folder_path_TFA);
     end
@@ -82,65 +83,71 @@ for i = 1:numel(folder_base_sub)
     % Initialize a cell array to store job structure for the phase file
     crop_job_phase = [];
 
-        % Second job for phase_file
+    % Second job for phase_file
     phase_file = spm_select('FPList', folder_path_pre, '^tph_aefdfMspm.*\.mat$');
 
     crop_job_phase{1}.spm.meeg.preproc.crop.D = {phase_file};
-    crop_job_phase{1}.spm.meeg.preproc.crop.timewin = [0 100];
+    %crop_job_phase{1}.spm.meeg.preproc.crop.timewin = [0 100];
+    crop_job_phase{1}.spm.meeg.preproc.crop.timewin = [-90 200];
     crop_job_phase{1}.spm.meeg.preproc.crop.freqwin = [-Inf Inf];
     crop_job_phase{1}.spm.meeg.preproc.crop.channels{1}.all = 'all';
     crop_job_phase{1}.spm.meeg.preproc.crop.prefix = 'p';
 
-        % Run the crop job for the phase file
+    % Run the crop job for the phase file
     spm_jobman('run', crop_job_phase);
 
     % Move files to TFA folder
-    files_to_move = spm_select('FPList', folder_path_pre, '^tph_aefdfMspm.*\.mat$');
+    files_to_move = spm_select('FPList', folder_path_pre, '^ptph_aefdfMspm.*\.mat$');
     for j = 1:size(files_to_move, 1)
         movefile(strtrim(files_to_move(j, :)), folder_path_TFA);
     end
 
-
-
-%   % Average
-
+    %% Average
     average_job = [];
-    average_power = spm_select('FPList', folder_path_TFA, '^tf_aefdfMspm.*\.mat$');
-
-    average_job{1}.spm.meeg.preproc.crop.D = {average_power};
-    average_job{1}.spm.meeg.preproc.crop.timewin = [0 300];
-    average_job{1}.spm.meeg.preproc.crop.freqwin = [-Inf Inf];
-    average_job{1}.spm.meeg.preproc.crop.channels{1}.all = 'all';
-    average_job{1}.spm.meeg.preproc.crop.prefix = 'p';
-    average_job{2}.spm.meeg.preproc.crop.D = {average_power};
-    average_job{2}.spm.meeg.preproc.crop.timewin = [0 300];
-    average_job{2}.spm.meeg.preproc.crop.freqwin = [-Inf Inf];
-    average_job{2}.spm.meeg.preproc.crop.channels{1}.all = 'all';
-    average_job{2}.spm.meeg.preproc.crop.prefix = 'p';
-    average_job{3}.spm.meeg.averaging.average.D(1) = cfg_dep('Crop: Cropped M/EEG datafile', substruct('.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','Dfname'));
-    average_job{3}.spm.meeg.averaging.average.userobust.standard = false;
-    average_job{3}.spm.meeg.averaging.average.plv = true;
-    average_job{3}.spm.meeg.averaging.average.prefix = 'm';
-    average_job{4}.spm.meeg.averaging.average.D(1) = cfg_dep('Crop: Cropped M/EEG datafile', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','Dfname'));
-    average_job{4}.spm.meeg.averaging.average.userobust.standard = false;
-    average_job{4}.spm.meeg.averaging.average.plv = false;
-    average_job{4}.spm.meeg.averaging.average.prefix = 'm';
+    average_power = spm_select('FPList', folder_path_TFA, '^ptf_aefdfMspm.*\.mat$');
+    average_phase = spm_select('FPList', folder_path_TFA, '^ptph_aefdfMspm.*\.mat$');
+    
+    average_job{1}.spm.meeg.averaging.average.D = {average_power};
+    average_job{1}.spm.meeg.averaging.average.userobust.standard = false;
+    average_job{1}.spm.meeg.averaging.average.plv = false;
+    average_job{1}.spm.meeg.averaging.average.prefix = 'm';
+    average_job{2}.spm.meeg.averaging.average.D = {average_phase};
+    average_job{2}.spm.meeg.averaging.average.userobust.standard = false;
+    average_job{2}.spm.meeg.averaging.average.plv = true;
+    average_job{2}.spm.meeg.averaging.average.prefix = 'm';
 
     spm_jobman('run', average_job);
-    % 
 
-    % Baseline rescaling
 
+    %% Baseline rescaling
     baseline_job = [];
-
     baseline_rescaled = spm_select('FPList', folder_path_TFA, '^m.*tf_aefdfMspm.*\.mat$');
-
     baseline_job{1}.spm.meeg.tf.rescale.D = {baseline_rescaled};
-    baseline_job{1}.spm.meeg.tf.rescale.method.LogR.baseline.timewin = [0 100];
+    %baseline_job{1}.spm.meeg.tf.rescale.method.LogR.baseline.timewin = [0 100];
+    baseline_job{1}.spm.meeg.tf.rescale.method.LogR.baseline.timewin = [-90 200];
     baseline_job{1}.spm.meeg.tf.rescale.method.LogR.baseline.pooledbaseline = 0;
     baseline_job{1}.spm.meeg.tf.rescale.method.LogR.baseline.Db = [];
     baseline_job{1}.spm.meeg.tf.rescale.prefix = 'r';
 
     spm_jobman('run', baseline_job);
-% 
+
+
+    %% Contrasting conditions
+    job = [];
+    power = spm_select('FPList', folder_path_TFA, '^rmptf.*\.mat$');
+    phase = spm_select('FPList', folder_path_TFA, '^mptph.*\.mat$');
+
+    job{1}.spm.meeg.averaging.contrast.D = {power};
+    job{1}.spm.meeg.averaging.contrast.contrast.c = [1 -1];
+    job{1}.spm.meeg.averaging.contrast.contrast.label = '1';
+    job{1}.spm.meeg.averaging.contrast.weighted = 1;
+    job{1}.spm.meeg.averaging.contrast.prefix = 'w';
+    job{2}.spm.meeg.averaging.contrast.D = {phase};
+    job{2}.spm.meeg.averaging.contrast.contrast.c = [1 -1];
+    job{2}.spm.meeg.averaging.contrast.contrast.label = '2';
+    job{2}.spm.meeg.averaging.contrast.weighted = 1;
+    job{2}.spm.meeg.averaging.contrast.prefix = 'w';
+
+    spm_jobman('run', job);
+    
 end
