@@ -170,7 +170,7 @@ for i = 1:numel(folder_base_sub)
     job{2}.spm.meeg.images.convert2images.channels{1}.type = 'EEG';
     job{2}.spm.meeg.images.convert2images.timewin = [-Inf Inf];
     job{2}.spm.meeg.images.convert2images.freqwin = [-Inf Inf];
-    job{2}.spm.meeg.images.convert2images.prefix = 'eeg_img_pow';
+    job{2}.spm.meeg.images.convert2images.prefix = 'eeg_img_pha';
 
     spm_jobman('run', job);
     
