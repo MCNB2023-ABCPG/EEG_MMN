@@ -3,7 +3,8 @@ function time_frequency_analysis(folder_path_root, spm_path)
 % initialization
 if ~exist('spm_path', 'var')
     %spm_path = '/Users/greta/Desktop/spm12';
-    spm_path = '/Users/pschm/spm12_dev_main';
+    %spm_path = '/Users/pschm/spm12_dev_main';
+    spm_path = '/Users/angelaseo/Documents/spm-main';
 end
 
 % set root path
@@ -147,6 +148,29 @@ for i = 1:numel(folder_base_sub)
     job{2}.spm.meeg.averaging.contrast.contrast.label = '2';
     job{2}.spm.meeg.averaging.contrast.weighted = 1;
     job{2}.spm.meeg.averaging.contrast.prefix = 'w';
+
+    spm_jobman('run', job);
+
+    %% Creating 2D Time Frequency Images
+    job = [];
+    power = spm_select('FPList', folder_path_TFA, '^rmptf.*\.mat$');
+    phase = spm_select('FPList', folder_path_TFA, '^mptph.*\.mat$');
+
+    job{1}.spm.meeg.images.convert2images.D = {power};
+    job{1}.spm.meeg.images.convert2images.mode = 'time x frequency';
+    job{1}.spm.meeg.images.convert2images.conditions = {};
+    job{1}.spm.meeg.images.convert2images.channels{1}.type = 'EEG';
+    job{1}.spm.meeg.images.convert2images.timewin = [-Inf Inf];
+    job{1}.spm.meeg.images.convert2images.freqwin = [-Inf Inf];
+    job{1}.spm.meeg.images.convert2images.prefix = 'eeg_img_pow';
+
+    job{2}.spm.meeg.images.convert2images.D = {phase};
+    job{2}.spm.meeg.images.convert2images.mode = 'time x frequency';
+    job{2}.spm.meeg.images.convert2images.conditions = {};
+    job{2}.spm.meeg.images.convert2images.channels{1}.type = 'EEG';
+    job{2}.spm.meeg.images.convert2images.timewin = [-Inf Inf];
+    job{2}.spm.meeg.images.convert2images.freqwin = [-Inf Inf];
+    job{2}.spm.meeg.images.convert2images.prefix = 'eeg_img_pow';
 
     spm_jobman('run', job);
     

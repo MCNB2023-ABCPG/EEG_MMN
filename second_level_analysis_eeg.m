@@ -1,8 +1,8 @@
 function second_level_analysis_eeg(folder_path_root, spm_path)
 % initialization
 if ~exist('spm_path', 'var')
-    %spm_path = '/Users/angelaseo/Documents/spm-main';
-    spm_path = '/Users/pschm/spm12_dev_main';
+    spm_path = '/Users/angelaseo/Documents/spm-main';
+    %spm_path = '/Users/pschm/spm12_dev_main';
 end
 
 % set root path
@@ -31,25 +31,33 @@ for i = 1:numel(folder_base_sub)
     % select STATS directory
     folder_path_stats = fullfile(S.folder_path_data, S.folder_base_sub, 'STATS');
 
+      % select ERP folder 
+    folder_path_ERP = fullfile(folder_path_stats, 'ERP');
+
+    % Create TFA folder if it doesn't exist
+    if ~exist(folder_path_ERP, 'dir')
+            mkdir(folder_path_ERP);
+    end
+
 % Convert to NIFTI Image
     preprocessed_image = spm_select('FPList', folder_path_pre, '^aefdfMspm.*\.mat$');
     convert2image(preprocessed_image)
 
     % move converted subject folder to STATS
     basename = 'aefdfMspmeeg_subject1';
-    movefile(fullfile(folder_path_pre, basename), fullfile(folder_path_stats, basename))
+    movefile(fullfile(folder_path_pre, basename), fullfile(folder_path_ERP, basename))
 
   % Factorial Design Specification
     job = [];
     subject_folder =  'aefdfMspmeeg_subject1';
-    job{1}.spm.stats.factorial_design.dir = {folder_path_stats};
+    job{1}.spm.stats.factorial_design.dir = {folder_path_ERP};
     
     % Selecting nii files for condition_standard
-    condition1 = spm_select('ExtFPList', fullfile(folder_path_stats, subject_folder), '^condition_standard.*\.nii$');
+    condition1 = spm_select('ExtFPList', fullfile(folder_path_ERP, subject_folder), '^condition_standard.*\.nii$');
     job{1}.spm.stats.factorial_design.des.t2.scans1 = cellstr(condition1);
 
     % Select nii files for condition_rare
-    condition2 = spm_select('ExtFPList', fullfile(folder_path_stats, subject_folder), '^condition_rare.*\.nii$');
+    condition2 = spm_select('ExtFPList', fullfile(folder_path_ERP, subject_folder), '^condition_rare.*\.nii$');
     job{1}.spm.stats.factorial_design.des.t2.scans2 = cellstr(condition2);
 
     job{1}.spm.stats.factorial_design.des.t2.dept = 0;
@@ -68,7 +76,7 @@ for i = 1:numel(folder_base_sub)
     spm_jobman('run', job);
 
     % Estimate
-    design_file = spm_select('FPList', folder_path_stats, '^SPM.mat$');    %selecting the desgin matrix specified earlier
+    design_file = spm_select('FPList', folder_path_ERP, '^SPM.mat$');    %selecting the desgin matrix specified earlier
 
     job = [];
     job{1}.spm.stats.fmri_est.spmmat = {design_file};
@@ -78,7 +86,7 @@ for i = 1:numel(folder_base_sub)
     spm_jobman('run', job)
 
     % Contrasts
-    design_file = spm_select('FPList', folder_path_stats, '^SPM.mat$');
+    design_file = spm_select('FPList', folder_path_ERP, '^SPM.mat$');
 
     job = [];
     job{1}.spm.stats.con.spmmat = {design_file};
@@ -90,7 +98,7 @@ for i = 1:numel(folder_base_sub)
     spm_jobman('run', job);
 
     % Reporting Results
-    design_file = spm_select('FPList', folder_path_stats, '^SPM.mat$');
+    design_file = spm_select('FPList', folder_path_ERP, '^SPM.mat$');
 
     job = [];
     job{1}.spm.stats.results.spmmat = {design_file};
